@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css?v=1">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">Playlist Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Controls -->
+        <div class="row mb-4 g-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by song title...">
+                    <button class="btn btn-outline-primary" type="button" id="searchBtn">Get Song</button>
+                    <button class="btn btn-outline-secondary" type="button" id="resetBtn">Reset</button>
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <button class="btn btn-primary me-2" id="uploadBtn" data-bs-toggle="modal"
+                    data-bs-target="#uploadModal"><i class="bi bi-upload"></i> Upload JSON</button>
+                <button class="btn btn-success me-2" id="downloadBtn"><i class="bi bi-download"></i> Download
+                    CSV</button>
+                <button class="btn btn-danger" type="button" id="clearAllBtn"><i class="bi bi-trash"></i> Clear
+                    All</button>
+            </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Upload Playlist JSON</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="jsonFile" class="form-label">Select JSON File</label>
+                            <input class="form-control" type="file" id="jsonFile" accept=".json">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="confirmUploadBtn">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="songsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th data-sort="id" class="sortable">ID <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="title" class="sortable">Title <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="song_class" class="sortable">Class <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="danceability" class="sortable">Danceability <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="energy" class="sortable">Energy <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="key" class="sortable">Key <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="loudness" class="sortable">Loudness <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="mode" class="sortable">Mode <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="acousticness" class="sortable">Acousticness <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="instrumentalness" class="sortable">Instrumentalness <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="liveness" class="sortable">Liveness <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="valence" class="sortable">Valence <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="tempo" class="sortable">Tempo <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="duration_ms" class="sortable">Duration (ms) <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="time_signature" class="sortable">Time Signature <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="num_bars" class="sortable">Bars <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="num_sections" class="sortable">Sections <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="num_segments" class="sortable">Segments <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                                <th data-sort="rating" class="sortable">Rating <i
+                                        class="bi bi-arrow-down-up small text-muted"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span id="pageInfo" class="text-muted">Showing 0-0 of 0</span>
+                    <nav>
+                        <ul class="pagination mb-0" id="pagination">
+                            <!-- Pages -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <h3 class="mb-3">Analytics</h3>
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold">Danceability vs Energy</div>
+                    <div class="card-body">
+                        <canvas id="scatterChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold">Duration Distribution (Histogram)</div>
+                    <div class="card-body">
+                        <canvas id="histogramChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold">Acousticness by Song</div>
+                    <div class="card-body">
+                        <canvas id="acousticChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold">Tempo by Song</div>
+                    <div class="card-body">
+                        <canvas id="tempoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js?v=1"></script>
+</body>
+
+</html>
