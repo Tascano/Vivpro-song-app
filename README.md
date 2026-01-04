@@ -226,7 +226,7 @@ All endpoints are public. Use standard HTTP methods and JSON payloads.
 
 ## Deployment
 
-Currently the app is deployed to https://vivprotest.fastapicloud.dev/ using fastapi deploy.
+Currently the app is deployed to https://vivpro-song-app.fastapicloud.dev/ using fastapi deploy.
 
 ## � Troubleshooting
 
