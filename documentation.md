@@ -2,7 +2,7 @@
 
 This document provides comprehensive technical details about the Playlist Management Application, including implementation decisions, architecture choices, and development guidelines.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ### System Components
 
@@ -29,37 +29,22 @@ This document provides comprehensive technical details about the Playlist Manage
 - **Maintainability**: Clear separation of concerns, documented code
 - **Performance**: Efficient queries, pagination, minimal data transfer
 
-## ⚙️ Configuration & Environment
-
-### Environment Variables
-
-```bash
-# Database
-DATABASE_URL=sqlite:///./playlist.db
-
-# Server
-HOST=0.0.0.0
-PORT=8000
-DEBUG=True
-
-# Development
-RELOAD=True
-LOG_LEVEL=INFO
-```
+## Configuration & Environment
 
 ### Configuration Management
 
 **Database Configuration** (`app/core/database.py`):
-- SQLAlchemy engine with connection pooling
+- SQLAlchemy engine with SQLite database
+- Database URL hardcoded as `sqlite:///./playlist.db`
 - Session management with proper cleanup
-- Automatic table creation on startup
+- Automatic table creation on startup (drops and recreates tables on each startup)
 
 **CORS Configuration** (`app/main.py`):
 - Configured for local development
 - Allows all origins, methods, and headers
 - Production should restrict to specific domains
 
-## 🔄 Development Workflow
+## Development Workflow
 
 ### Local Development Setup
 
@@ -95,13 +80,13 @@ LOG_LEVEL=INFO
 **Import Structure**:
 ```
 app/
-├── main.py           # Entry point, routes, app config
+├── main.py           # Entry point, routes, app config, Pydantic models
 ├── core/             # Infrastructure (database, config)
+│   └── database.py   # Database engine and session management
 ├── models/           # Data models (SQLAlchemy)
-├── routers/          # Route handlers (FastAPI)
-├── services/         # Business logic
-├── schemas/          # Pydantic models (validation)
+│   └── song.py       # Song model definition
 └── utils/            # Utilities (data processing)
+    └── data_utils.py # JSON normalization and data insertion
 ```
 
 **Dependency Injection**:
@@ -119,9 +104,7 @@ is_column_oriented = isinstance(data, dict) and all(isinstance(v, dict) for v in
 ```
 
 **Row-Oriented Detection**:
-```python
-is_row_oriented = isinstance(data, list) and all(isinstance(item, dict) for item in data)
-```
+The code handles row-oriented format as the fallback case when data is not column-oriented. It checks if data is a list or a dict containing a "songs" key.
 
 ### Data Normalization Process
 
@@ -138,7 +121,7 @@ is_row_oriented = isinstance(data, list) and all(isinstance(item, dict) for item
 - **Type Errors**: Safe conversion with fallbacks
 - **Large Files**: No explicit size limits (SQLite handles gracefully)
 
-## 🧪 Testing Strategy
+## Testing Strategy
 
 ### Unit Testing (`tests/unit/`)
 
@@ -187,31 +170,6 @@ def test_upload_integration():
 - Test data cleanup
 - Common test utilities
 
-## 📝 Logging & Monitoring
-
-### Logging Configuration
-
-**Setup** (`app/main.py`):
-```python
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-```
-
-**Log Levels**:
-- **INFO**: Normal operations (startup, successful uploads)
-- **WARNING**: Non-critical issues (missing fields)
-- **ERROR**: Failures (database errors, invalid requests)
-
-### Health Check Endpoint
-
-**GET /health**:
-```json
-{"status": "ok"}
-```
-
-**Usage**: Load balancer health checks, monitoring systems
 
 ## 🚨 Error Handling
 
@@ -227,13 +185,13 @@ logging.basicConfig(
 **Pydantic Models**:
 ```python
 class RatingRequest(BaseModel):
-    rating: int = Field(ge=0, le=5)
+    rating: int
 ```
 
 **Custom Validation**:
-- Rating range checking
-- File format validation
-- Required field presence
+- Rating range checking (0-5) performed in endpoint handler
+- File format validation (must be .json)
+- Required field presence handled with defaults in data processing
 
 ### Exception Handling
 
@@ -266,12 +224,12 @@ def get_songs(page: int = 1, limit: int = 10):
 
 ### Search Implementation
 
-**ILIKE Query**:
-```sql
-SELECT * FROM songs WHERE title ILIKE '%love%'
+**Case-Insensitive Search**:
+```python
+query = db.query(Song).filter(Song.title.ilike(f"%{title}%"))
 ```
 
-**Case-Insensitive**: Works with SQLite's ILIKE extension
+**Case-Insensitive**: Uses SQLAlchemy's `ilike()` method for case-insensitive matching
 **Partial Matching**: Finds "Love Song" when searching "love"
 
 ### File Upload Processing
@@ -279,18 +237,26 @@ SELECT * FROM songs WHERE title ILIKE '%love%'
 **Multipart Handling**:
 ```python
 @app.post("/api/songs/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    if not file.filename.endswith('.json'):
+        raise HTTPException(status_code=400, detail="Only JSON files are allowed")
     content = await file.read()
     data = json.loads(content.decode())
-    # Process data...
+    message = normalize_and_insert_data(data, db)
+    return {"message": message}
 ```
 
 **Content Validation**:
-- JSON parsing
-- Format detection
+- Filename extension check (.json required)
+- JSON parsing with error handling
+- Format detection (column vs row-oriented)
 - Data normalization
+<<<<<<< HEAD
+- Database insertion/update
+=======
 - Database insertion
 
+>>>>>>> 228e4e206efd091b335cb050fdd2345d72540843
 
 ## 🗄️ Database Design
 
@@ -311,10 +277,10 @@ CREATE TABLE songs (
 
 ### Indexing Strategy
 
-**Current Indexes**:
-- Primary key on `pk`
-- Unique index on `id`
-- Index on `title` (for search)
+**Current Indexes** (defined in `app/models/song.py`):
+- Primary key on `pk` (automatic with `primary_key=True`)
+- Unique index on `id` (`unique=True, index=True`)
+- Index on `title` (`index=True` for search optimization)
 
 **Performance Considerations**:
 - SQLite automatically indexes primary keys
@@ -329,9 +295,11 @@ CREATE TABLE songs (
 - No raw SQL string concatenation
 
 **File Upload Security**:
-- Content-Type validation
+- Filename extension validation (must be .json)
 - JSON parsing with error handling
 - No execution of uploaded content
+<<<<<<< HEAD
+=======
 
 ### CORS Configuration
 
@@ -355,3 +323,4 @@ app.add_middleware(
 **Backup Strategy**:
 - SQLite file can be copied for backup
 - Automated backup scripts for production
+>>>>>>> 228e4e206efd091b335cb050fdd2345d72540843
