@@ -5,4 +5,5 @@ python-multipart
 requests
 httpx
 pytest
+pytest-cov
 fastapi[standard]

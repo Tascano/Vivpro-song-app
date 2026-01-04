@@ -171,13 +171,17 @@ Run without starting the server - test individual components:
 pytest tests/unit/
 
 # Run with coverage report
+# Line coverage
 pytest --cov=app tests/unit/ --cov-report=term-missing
+
+# Branch coverage
+pytest --cov=app tests/unit/ --cov-report=term-missing --cov-branch
 
 # Run specific test
 pytest tests/unit/test_main.py::test_upload_row_oriented -v
 ```
 
-**Coverage**: 81% - tests API endpoints, data processing, validation, and error handling.
+**Coverage**: 90% line and 89% branch coverage - tests API endpoints, data processing, validation, and error handling.
 
 ### Integration Tests (Full System)
 Test complete workflows with live server:
