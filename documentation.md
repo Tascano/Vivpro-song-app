@@ -94,7 +94,7 @@ app/
 - Automatic session cleanup
 - Test-friendly with overrides
 
-## 📊 Data Processing & Validation
+## Data Processing & Validation
 
 ### JSON Format Detection
 
@@ -171,7 +171,7 @@ def test_upload_integration():
 - Common test utilities
 
 
-## 🚨 Error Handling
+## Error Handling
 
 ### HTTP Status Codes
 
@@ -200,7 +200,7 @@ class RatingRequest(BaseModel):
 - Logs errors for debugging
 - Returns user-friendly error messages
 
-## 🔍 API Implementation Details
+## API Implementation Details
 
 ### Pagination Logic
 
@@ -258,7 +258,7 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db
 
 >>>>>>> 228e4e206efd091b335cb050fdd2345d72540843
 
-## 🗄️ Database Design
+## Database Design
 
 ### Song Model Schema
 
@@ -286,7 +286,7 @@ CREATE TABLE songs (
 - SQLite automatically indexes primary keys
 - Additional indexes added as needed for query patterns
 
-## 🔒 Security Considerations
+## Security Considerations
 
 ### Input Sanitization
 
