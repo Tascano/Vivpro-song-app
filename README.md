@@ -48,7 +48,7 @@ uvicorn app.main:app --reload
 2. Click "Upload JSON" and select a file from `sample_data/`
 3. Try both formats:
    - `Playlist.json` (column-oriented, 100 songs)
-   - `sample_column_data.json` (row-oriented, 3 songs)
+   - `sample_row_data.json` (row-oriented, 3 songs)
 
 ## 📊 Data Processing
 
