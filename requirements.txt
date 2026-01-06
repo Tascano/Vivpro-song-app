@@ -6,4 +6,5 @@ requests
 httpx
 pytest
 pytest-cov
+pytest-asyncio
 fastapi[standard]
